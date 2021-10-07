@@ -1,0 +1,41 @@
+# Add rules here to build your software
+# See https://docs.bazel.build/versions/main/build-ref.html#BUILD_files
+load("@npm//@bazel/webpack/webpack:defs.bzl", "webpack_bundle")
+load("@npm//http-server:index.bzl", "http_server")
+load("@build_bazel_rules_nodejs//:index.bzl", "pkg_web")
+
+webpack_bundle(
+    name = "build",
+    output_dir = True,
+    entry_points = {
+        "src/main.js": "bundle"
+    },
+    args = [
+        "--mode",
+        "production",
+    ],
+    webpack_config = ":webpack.config.js",
+    data = [
+        "@npm//d3",
+    ] + glob(["src/**"]),
+    supports_workers = True,
+)
+
+pkg_web(
+    name = "release",
+    srcs = [
+        ":build",
+        "public/index.html"
+    ],
+    additional_root_paths = [
+        "public"
+    ]
+)
+
+http_server(
+    name = "server",
+    data = [
+        ":release"
+    ],
+    templated_args = ["./release/"],
+)

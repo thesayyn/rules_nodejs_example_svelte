@@ -1,0 +1,1 @@
+# Example use of rules_webpack with Svelte
